@@ -16,9 +16,9 @@ extern WebServer server;
 const int SAMPLING_DELAY = 1800000;
 
 //comment out lines according to data destinations if required
-//#define SEND_DATA_TO_SHEETS
-//#define SEND_DATA_TO_CSV
-#define COMMUNICATE_WITH_PHONE
+#define SEND_DATA_TO_SHEETS
+// #define SEND_DATA_TO_CSV
+// #define COMMUNICATE_WITH_PHONE
 
 void setup() {
   initWifi();
