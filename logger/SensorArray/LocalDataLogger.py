@@ -5,7 +5,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-CSV_FILE = "sensor_log.csv"
+CSV_FILE = "measurements.csv"
 
 #give Flask app all POST data
 @app.route("/data", methods=["POST"])
