@@ -10,7 +10,7 @@
 const char* ssid     = "UNIFI-AP";
 const char* password = "P@ssw0rd";
 
-const char* HOST_NAME = "force_sensor"
+const char* HOST_NAME = "force_sensor";
 
 // =============================
 // Matrix Pins
