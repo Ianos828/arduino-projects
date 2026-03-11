@@ -28,9 +28,9 @@ extern String getSensorsJson();
 * The JSON data from the sensors is uploaded to the ESP32's own server for the phone app to read.
 */
 void handleTrigger() {
-    String json = getSensorsJson();
+  String json = getSensorsJson();
 
-    server.send(200, "application/json", json);
+  server.send(200, "application/json", json);
 }
 
 /*
