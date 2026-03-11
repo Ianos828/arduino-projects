@@ -88,9 +88,6 @@ void loop() {
   #ifdef COMMUNICATE_WITH_PHONE
     webServer.handleClient();
   #endif
-
-  // Always update matrix for live display
-  readMatrix();
 }
 
 //Below code is for a separate webserver for communication with phone
@@ -117,7 +114,8 @@ void initialiseWebServer() {
 * The JSON data from the sensors is uploaded to the ESP32's own server for the phone app to read.
 */
 void handleTrigger() {
-  //DUPLICATED CODE FROM UR sendMatrixToGoogleSheets() METHOD
+  readMatrix();
+  
   // Build comma-separated values
   String payload = "";
   for (int r = 0; r < ROW_COUNT; r++) {
