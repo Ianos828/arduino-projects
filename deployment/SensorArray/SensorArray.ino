@@ -15,8 +15,6 @@ extern WebServer server;
 */
 void setup() {
   initWifi();
-  
-  //initialise all sensors
   initAllSensors();
 }
 
