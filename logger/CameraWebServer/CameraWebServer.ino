@@ -4,8 +4,6 @@
 #include <WiFiClientSecure.h>
 #include "board_config.h"
 #include <time.h>
-#include <WebServer.h>
-#include <ESPmDNS.h>
 
 // Base64 encoding (minimal implementation)
 static const char* base64_chars = 
@@ -44,7 +42,6 @@ const char *password = "P@ssw0rd";
 
 // Replace with your actual deployed Google Apps Script URL
 const char* GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRjrJyLJHzfCRWS1pw5IrI_50RQVp2L_TOjvKZi3AHw1YUUFvjCPpRtTsqjiNSgs5qKQ/exec";
-const char* HOST_NAME = "esp32_cam_image";
 
 // Flash LED pin
 #define FLASH_LED_PIN     4
@@ -59,15 +56,6 @@ const unsigned long interval = 1800000UL;  // 30 minutes
 const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = 28800;       // UTC+8 = 8 * 3600
 const int   daylightOffset_sec = 0;
-
-//sets up a webserver at port 80
-WebServer server(80);
-
-//forward declarations
-void initialiseWebServer();
-void handleTrigger();
-
-#define COMMUNICATE_WITH_PHONE
 
 void setup() {
   Serial.begin(115200);
@@ -158,9 +146,6 @@ void setup() {
 
   captureAndUploadPhoto();
   previousMillis = millis();
-
-  //set up webserver for phone app
-  initialiseWebServer();
 }
 
 //Below code is for a separate webserver for communication with phone
@@ -179,36 +164,6 @@ void initialiseWebServer() {
   server.begin();
 
   Serial.println("HTTP server started");
-}
-
-//when a HTTP GET request is received from the app
-void handleImage() {
-  //turn on the LED and wait 2s
-  ledcWrite(FLASH_LED_PIN, FLASH_BRIGHTNESS);
-  delay(2000);
-
-  //get the image
-  camera_fb_t * fb = esp_camera_fb_get();
-
-  //turn off the LED
-  ledcWrite(FLASH_LED_PIN, 0);
-
-  //if capture fails
-  if (!fb) {
-      server.send(500, "text/plain", "Camera capture failed");
-      return;
-  }
-
-  //else send the image via WiFi to mDNS server
-  server.send_P(
-      200,
-      "image/jpeg",
-      (const char*)fb->buf,
-      fb->len
-  );
-
-  //releases the buffer
-  esp_camera_fb_return(fb);
 }
 
 void captureAndUploadPhoto() {
@@ -316,11 +271,6 @@ void captureAndUploadPhoto() {
 }
 
 void loop() {
-  //only listen for app requests when the constant is defined 
-  #ifdef COMMUNICATE_WITH_PHONE
-    server.handleClient();
-  #endif
-
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;

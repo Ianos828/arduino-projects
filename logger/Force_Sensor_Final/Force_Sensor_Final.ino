@@ -1,8 +1,6 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <WiFiClientSecure.h>
-#include <WebServer.h>
-#include <ESPmDNS.h>
 
 // =============================
 // Wi-Fi Credentials
@@ -15,7 +13,6 @@ const char* password = "P@ssw0rd";
 // =============================
 // Make sure this is your real deployed web app URL with /exec
 const char* GOOGLE_SERVER_URL = "https://script.google.com/macros/s/AKfycbwI3v-q9joOscSdw_lYDmvAsofaRes9HZnBwhH90rWYbiDjLet5iu27EyQRo9D2XEt2/exec";
-const char* HOST_NAME = "force_sensor"
 
 // =============================
 // Matrix Pins
@@ -35,10 +32,7 @@ const int columnPins[COLUMN_COUNT] = {2,4,5,12,13,14,15,16,17,18,19,21,22,23,25,
 // Globals
 // =============================
 WiFiServer server(80);
-WebServer webServer(80);
 int fsrValues[ROW_COUNT][COLUMN_COUNT];
-
-#define COMMUNICATE_WITH_PHONE //for use with phone app
 
 // For periodic uploads (currently 2 seconds for testing)
 unsigned long lastUploadTime = 0;
@@ -53,8 +47,6 @@ void disableAllColumns();
 void readMatrix();
 void sendWebPage(WiFiClient client);
 void sendMatrixToGoogleSheets();
-void initialiseWebServer();
-void handleTrigger();
 
 // =============================
 // Setup
@@ -91,18 +83,12 @@ void setup() {
   Serial.println(WiFi.localIP());
 
   server.begin();
-
-  initialiseWebServer();
 }
 
 // =============================
 // Main Loop
 // =============================
 void loop() {
-  #ifdef COMMUNICATE_WITH_PHONE
-    webServer.handleClient();
-  #endif
-
   // Always update matrix for live display
   readMatrix();
 
@@ -128,47 +114,6 @@ void loop() {
   }
 
   delay(500);  // controls live page refresh frequency
-}
-//Below code is for a separate webserver for communication with phone
-void initialiseWebServer() {
-  // Start mDNS
-  if (MDNS.begin(HOST_NAME)) {
-      Serial.println("mDNS started");
-      Serial.print("Access at: http://");
-      Serial.print(HOST_NAME);
-      Serial.println(".local/trigger");
-  }
-
-  // API endpoint
-  webServer.on("/trigger", HTTP_GET, handleTrigger);
-
-  webServer.begin();
-
-  Serial.println("HTTP server started");
-}
-
-/**
-* This method runs when the ESP32 receives a HTTP GET request from the phone.
-* 
-* The JSON data from the sensors is uploaded to the ESP32's own server for the phone app to read.
-*/
-void handleTrigger() {
-  //DUPLICATED CODE FROM UR sendMatrixToGoogleSheets() METHOD
-  // Build comma-separated values
-  String payload = "";
-  for (int r = 0; r < ROW_COUNT; r++) {
-    for (int c = 0; c < COLUMN_COUNT; c++) {
-      payload += String(fsrValues[r][c]);
-      if (!(r == ROW_COUNT-1 && c == COLUMN_COUNT-1)) {
-        payload += ",";
-      }
-    }
-  }
-
-  // Create JSON
-  String jsonPayload = "{\"matrix\":\"" + payload + "\"}";
-
-  webServer.send(200, "application/json", jsonPayload);
 }
 
 // =============================

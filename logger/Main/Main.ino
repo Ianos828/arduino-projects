@@ -1,6 +1,4 @@
 #include <Arduino.h> //hariz
-#include <WebServer.h>
-#include <ESPmDNS.h>
 
 extern void initWifi();
 extern void initAllSensors();
@@ -10,7 +8,6 @@ extern String getSensorsJson();
 // External variables defined in WifiFunctions.ino hariz
 extern const char* GOOGLE_SERVER_URL;
 extern const char* LOCAL_PC_URL;
-extern WebServer server;
 
 //timing constants CHANGE THIS to 1h or smth!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! hi regan
 const int SAMPLING_DELAY = 1800000;
@@ -28,10 +25,6 @@ void setup() {
 }
 
 void loop() {
-  #ifdef COMMUNICATE_WITH_PHONE
-    server.handleClient();
-  #endif
-
   //ideally all the code below this gets nuked if we dont need data logging
   //get and send all sensor data via WiFi
   String payload = getSensorsJson();

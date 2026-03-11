@@ -13,29 +13,13 @@ void connectedToApHandler(WiFiEvent_t wifiEvent, WiFiEventInfo_t wifiInfo);
 void gotIpHandler(WiFiEvent_t wifiEvent, WiFiEventInfo_t wifiInfo);
 void wifiDisconnectedHandler(WiFiEvent_t wifiEvent, WiFiEventInfo_t wifiInfo);
 
-void handleTrigger();
-
 //for WiFi connection, modify accordingly
 const char* SSID = "UNIFI-AP";
 const char* PASSWORD = "P@ssw0rd";
 const char* GOOGLE_SERVER_URL = "https://script.google.com/macros/s/AKfycbzr3yFizSsGRuR5JW_b-NV4U0gP653yVst_NULgUE_q2XwP9R1jWwkB5Oh-yC61BzUVQQ/exec";
 const char* LOCAL_PC_URL = "http://192.168.68.55:5000/data";  //http://<PC-IP>:5000/data [get ur pc ip via cmd ipconfig /all and find the ipv4 value]
-const char* HOST_NAME = "esp32_combined";
-
-WebServer server(80);
 
 extern String getSensorsJson();
-
-/*
-* This method runs when the ESP32 receives a HTTP GET request from the phone.
-* 
-* The JSON data from the sensors is uploaded to the ESP32's own server for the phone app to read.
-*/
-void handleTrigger() {
-    String json = getSensorsJson();
-
-    server.send(200, "application/json", json);
-}
 
 void initWifi() {
   //sets WiFi mode to STATION mode
@@ -61,21 +45,6 @@ void initWifi() {
     Serial.print("IP Address: ");
     Serial.println(WiFi.localIP());
   }
-
-  // Start mDNS
-  if (MDNS.begin(HOST_NAME)) {
-      Serial.println("mDNS started");
-      Serial.print("Access at: http://");
-      Serial.print(HOST_NAME);
-      Serial.println(".local/trigger");
-  }
-
-  // API endpoint
-  server.on("/trigger", HTTP_GET, handleTrigger);
-
-  server.begin();
-
-  Serial.println("HTTP server started");
 }
 
 void sendDataViaWifi(const char* serverUrl, String payload) {
