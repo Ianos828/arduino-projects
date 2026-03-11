@@ -22,8 +22,6 @@ const int SAMPLING_DELAY = 1800000;
 */
 void setup() {
   initWifi();
-  
-  //initialise all sensors
   initAllSensors();
 }
 
@@ -31,7 +29,6 @@ void setup() {
 * Main loop of the program that periodically sends sensor data to specified locations.
 */
 void loop() {
-  //get and send all sensor data via WiFi
   String payload = getSensorsJson();
   Serial.println(payload);
 
