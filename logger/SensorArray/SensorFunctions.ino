@@ -71,6 +71,9 @@ const int DGS_STRING_PPB_STARTING_INDEX = 14;
 extern const char* GOOGLE_SERVER_URL;
 extern const char* LOCAL_PC_URL;
 
+/*
+* Initialises all sensors in the sensor array.
+*/
 void initAllSensors() {
   Serial.begin(HIGH_BAUD_RATE);
 
@@ -81,6 +84,9 @@ void initAllSensors() {
   initOpt101();
 }
 
+/*
+* Initialises the ethylene sensor DGS2.
+*/
 void initDgs() {
   Serial1.begin(LOW_BAUD_RATE, SERIAL_8N1, DGS_RX_PIN, DGS_TX_PIN);  //Start Serial1 for DGS comm RX: 7, TX: 8
   delay(1000);
@@ -88,6 +94,9 @@ void initDgs() {
   Serial.println("Ethylene Sensor initialised!");
 }
 
+/*
+* Initialises the Triad sensor.
+*/
 void initTriad() {
   if (!triad.begin()) {
     Serial.println("Triad not detected.");
@@ -100,6 +109,9 @@ void initTriad() {
   }
 }
 
+/*
+* Initialises the LiDAR.
+*/
 void initLidar() {
   // --- LiDAR (VL53L1X) ---
   if (!lidar.begin()) {
@@ -113,6 +125,9 @@ void initLidar() {
   }
 }
 
+/*
+* Initialises the SGP40 Air Quality Sensor.
+*/
 void initSgp40() {
   while (!Serial) { delay(10); } // Wait for serial console to open!
 
@@ -123,6 +138,9 @@ void initSgp40() {
   }
 }
 
+/*
+* Initialises the OPT101.
+*/
 void initOpt101() {
   delay(1000);
   analogReadResolution(12); // Sets ADC to 0-4095 range
@@ -214,6 +232,11 @@ String getSensorsJson() {
   );
 }
 
+/*
+* Returns a fluorescence reading from the OPT101.
+*
+* @return an average fluorescence reading averaged from 20 readings.
+*/
 float getOpt101Reading() {
   // Set up for a new batch of readings
   // Serial.print("Taking 20 OPT101 readings...");
@@ -271,6 +294,11 @@ float getOpt101Reading() {
   return averageFluorescenceIntensity;
 }
 
+/*
+* Returns an array of NIR readings from the Triad.
+*
+* @return a pointer to a float array of NIR readings.
+*/
 float* getTriadReading() {
   // Start measurement
   triad.takeMeasurementsWithBulb();
@@ -293,6 +321,11 @@ float* getTriadReading() {
   return nirReadings;
 }
 
+/*
+* Returns the distance measured between the LiDAR and the specimen being measured.
+*
+* @return an int denoting the distance measured from the LiDAR to the specimen.
+*/
 int getLidarReading() {
   // ---------- LiDAR ----------
   lidar.startRanging();                       // Trigger a single measurement
@@ -321,6 +354,11 @@ int getLidarReading() {
   return distance;
 }
 
+/*
+* Returns the ethylene concentration in String format after splicing from the built-in data format returned from the DGS2.
+*
+* @return the ethylene concentration as a String.
+*/
 String getDgsReading() {
   Serial1.write('\r');
   // While data is available from DGS/DGS2 serial
@@ -332,18 +370,38 @@ String getDgsReading() {
   return DgsOutputString.substring(DGS_STRING_PPB_STARTING_INDEX, indexOfSecondComma);
 }
 
+/*
+* Returns the Air Quality reading from SGP40 as an int
+*
+* @return an int denoting Air Quality
+*/
 uint16_t getSgp40Reading() {
   return sgp.measureRaw();
 }
 
+/*
+* Returns the reading from the MQ3 sensor.
+*
+* @return an integer denoting the MQ3 sensor reading
+*/
 int getMq3Reading() {
   return analogRead(MQ3_PIN);
 }
 
+/*
+* Returns the reading from the MQ4 sensor.
+*
+* @return an integer denoting the MQ4 sensor reading
+*/
 int getMq4Reading() {
   return analogRead(MQ4_PIN);
 }
 
+/*
+* Returns the reading from the MQ5 sensor.
+*
+* @return an integer denoting the MQ5 sensor reading
+*/
 int getMq5Reading() {
   return analogRead(MQ5_PIN);
 }

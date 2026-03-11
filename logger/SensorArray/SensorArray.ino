@@ -1,9 +1,10 @@
-#include <Arduino.h> //hariz
+#include <Arduino.h>
 
 extern void initWifi();
 extern void initAllSensors();
-extern void reconnectWifi();
 extern String getSensorsJson();
+extern void reconnectWifi();
+extern void sendDataViaWifi(const char* serverUrl, String payload);
 
 // External variables defined in WifiFunctions.ino hariz
 extern const char* GOOGLE_SERVER_URL;
@@ -15,8 +16,10 @@ const int SAMPLING_DELAY = 1800000;
 //comment out lines according to data destinations if required
 #define SEND_DATA_TO_SHEETS
 // #define SEND_DATA_TO_CSV
-// #define COMMUNICATE_WITH_PHONE
 
+/*
+* Intialises the ESP32 to connect to the WiFi network and initialise all sensors.
+*/
 void setup() {
   initWifi();
   
@@ -24,8 +27,10 @@ void setup() {
   initAllSensors();
 }
 
+/*
+* Main loop of the program that periodically sends sensor data to specified locations.
+*/
 void loop() {
-  //ideally all the code below this gets nuked if we dont need data logging
   //get and send all sensor data via WiFi
   String payload = getSensorsJson();
   Serial.println(payload);

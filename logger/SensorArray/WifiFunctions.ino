@@ -2,8 +2,6 @@
 #include <HTTPClient.h>
 #include <string.h>
 #include <WiFiClientSecure.h>
-#include <WebServer.h>
-#include <ESPmDNS.h>
 
 // Forward Declarations
 void initWifi();
@@ -21,6 +19,9 @@ const char* LOCAL_PC_URL = "http://192.168.68.55:5000/data";  //http://<PC-IP>:5
 
 extern String getSensorsJson();
 
+/*
+* Connects the ESP32 to the WiFi network.
+*/
 void initWifi() {
   //sets WiFi mode to STATION mode
   WiFi.mode(WIFI_STA);
@@ -47,6 +48,9 @@ void initWifi() {
   }
 }
 
+/*
+* Sends the JSON payload to the specified serverUrl via WiFi.
+*/
 void sendDataViaWifi(const char* serverUrl, String payload) {
   HTTPClient http;
   WiFiClientSecure secureClient; 
@@ -77,6 +81,9 @@ void sendDataViaWifi(const char* serverUrl, String payload) {
   }
 }
 
+/*
+* If WiFi gets disconnected, try to reconnect 5 times before giving up.
+*/
 void reconnectWifi() {
   // AGGRESSIVE RECONNECT
   int retryCount = 0;
@@ -95,16 +102,24 @@ void reconnectWifi() {
   }
 }
 
-//interrupts
+/*
+* Handler for when WiFi gets connected.
+*/
 void connectedToApHandler(WiFiEvent_t wifiEvent, WiFiEventInfo_t wifiInfo) {
   Serial.println("Connected To The WiFi Network");
 }
 
+/*
+* Handler when ESP32 is assigned an IP.
+*/
 void gotIpHandler(WiFiEvent_t wifiEvent, WiFiEventInfo_t wifiInfo) {
   Serial.print("Local ESP32 IP: ");
   Serial.println(WiFi.localIP());
 }
 
+/*
+* Handler when WiFi gets disconnected.
+*/
 void wifiDisconnectedHandler(WiFiEvent_t wifiEvent, WiFiEventInfo_t wifiInfo) {
   Serial.println("Disconnected From WiFi Network");
   // Attempt Re-Connection
