@@ -148,24 +148,6 @@ void setup() {
   previousMillis = millis();
 }
 
-//Below code is for a separate webserver for communication with phone
-void initialiseWebServer() {
-  // Start mDNS
-  if (MDNS.begin(HOST_NAME)) {
-      Serial.println("mDNS started");
-      Serial.print("Access at: http://");
-      Serial.print(HOST_NAME);
-      Serial.println(".local/trigger");
-  }
-
-  // API endpoint
-  server.on("/image", HTTP_GET, handleImage);
-
-  server.begin();
-
-  Serial.println("HTTP server started");
-}
-
 void captureAndUploadPhoto() {
 
   Serial.println("Starting capture & upload cycle...");
