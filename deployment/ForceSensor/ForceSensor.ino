@@ -116,19 +116,30 @@ void initialiseWebServer() {
 void handleTrigger() {
   readMatrix();
   
-  // Build comma-separated values
-  String payload = "";
+  int top1 = 0, top2 = 0, top3 = 0;
+
   for (int r = 0; r < ROW_COUNT; r++) {
     for (int c = 0; c < COLUMN_COUNT; c++) {
-      payload += String(fsrValues[r][c]);
-      if (!(r == ROW_COUNT-1 && c == COLUMN_COUNT-1)) {
-        payload += ",";
+      int val = fsrValues[r][c];
+
+      if (val > top1) {
+        top3 = top2;
+        top2 = top1;
+        top1 = val;
+      } else if (val > top2) {
+        top3 = top2;
+        top2 = val;
+      } else if (val > top3) {
+        top3 = val;
       }
     }
   }
 
-  // Create JSON
-  String jsonPayload = "{\"matrix\":\"" + payload + "\"}";
+  // Calculate average of top 3
+  float Avg = (top1 + top2 + top3) / 3.0;
+
+  // Create JSON 
+  String jsonPayload = "{\"matrix\":" + String(Avg, 2) + "}";
 
   webServer.send(200, "application/json", jsonPayload);
 }
