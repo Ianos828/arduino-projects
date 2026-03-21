@@ -7,6 +7,7 @@
 
 // Forward Declarations
 void handleTrigger();
+void handleLidarScan();
 void initWifi();
 void reconnectWifi();
 void connectedToApHandler(WiFiEvent_t wifiEvent, WiFiEventInfo_t wifiInfo);
@@ -21,6 +22,7 @@ const char* HOST_NAME = "esp32_combined";
 WebServer server(80);
 
 extern String getSensorsJson();
+extern String getLidarScanJson();
 
 /*
 * This method runs when the ESP32 receives a HTTP GET request from the phone.
@@ -30,6 +32,10 @@ extern String getSensorsJson();
 void handleTrigger() {
   String json = getSensorsJson();
 
+  server.send(200, "application/json", json);
+}
+void handleLidarScan() {
+  String json = getLidarScanJson();
   server.send(200, "application/json", json);
 }
 
@@ -71,6 +77,7 @@ void initWifi() {
 
   // API endpoint
   server.on("/trigger", HTTP_GET, handleTrigger);
+  server.on("/lidar-scan", HTTP_GET, handleLidarScan);
 
   server.begin();
 
