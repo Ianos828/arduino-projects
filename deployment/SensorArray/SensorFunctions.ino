@@ -6,6 +6,7 @@
 #include <string.h>
 #include <WiFi.h> //Hariz
 #include <ArduinoJson.h>
+#include <HTTPClient.h> // Kenrick's motor
 
 // Forward declarations for functions defined in WifiFunctions.ino Hariz
 extern void reconnectWifi();
@@ -35,7 +36,7 @@ uint16_t getSgp40Reading();
 int getMq3Reading();
 int getMq4Reading();
 int getMq5Reading();
-
+String getLidarScanJson();
 AS7265X triad;
 SFEVL53L1X lidar;
 Adafruit_SGP40 sgp;
@@ -400,4 +401,55 @@ int getMq4Reading() {
 */
 int getMq5Reading() {
   return analogRead(MQ5_PIN);
+}
+
+// Motor ESP32 hostname 
+const char* MOTOR_HOST = "http://motor-esp32.local";
+
+void callMotor(String endpoint) {
+  HTTPClient http;
+  http.begin(String(MOTOR_HOST) + endpoint);
+  http.GET();
+  http.end();
+}
+
+String getLidarScanJson() {
+  DynamicJsonDocument doc(8192);
+  JsonArray scanArray = doc.createNestedArray("scan");
+
+  const int TOTAL_STEPS      = 3200;
+  const int STEPS_PER_SAMPLE = 16;
+  const int SAMPLE_PAUSE_MS  = 20;
+
+  lidar.startRanging();
+
+  for (int step = 0; step < TOTAL_STEPS; step++) {
+    callMotor("/step");
+
+    if (step % STEPS_PER_SAMPLE == 0) {
+      delay(SAMPLE_PAUSE_MS);
+
+      uint32_t start = millis();
+      while (!lidar.checkForDataReady()) {
+        if (millis() - start > 300) break;
+        delay(5);
+      }
+
+      if (lidar.checkForDataReady()) {
+        int mm = lidar.getDistance();
+        lidar.clearInterrupt();
+
+        JsonObject point = scanArray.createNestedObject();
+        point["step"] = step;
+        point["mm"]   = mm;
+      }
+    }
+  }
+
+  lidar.stopRanging();
+  callMotor("/return");
+
+  String payload;
+  serializeJson(doc, payload);
+  return payload;
 }
